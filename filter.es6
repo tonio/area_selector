@@ -1,11 +1,12 @@
 "use strict";
 
-const buildStyle = (fillColor, strokeColor) => new ol.style.Style({
+const buildStyle = (fillColor, strokeColor, width) => new ol.style.Style({
   fill   : new ol.style.Fill({
     color : fillColor
   }),
   stroke : new ol.style.Stroke({
-    color : strokeColor
+    color : strokeColor,
+    width : width || 1
   })
 })
 
@@ -43,7 +44,7 @@ fetch('hdf.json').then(
 
 const select = new ol.interaction.Select({
   multi           : true,
-  style           : buildStyle([ 255, 255, 204, .35], [ 128, 128, 0, 1 ]),
+  style           : buildStyle([ 255, 255, 204, .35], [ 128, 128, 0, 1 ], 1.5),
   toggleCondition : ol.events.condition.always
 })
 map.getInteractions().push(select)
@@ -147,9 +148,8 @@ select.getFeatures().on('change:length', debounce(() => {
   let list = document.querySelector('.list')
   while (list.firstChild) { list.removeChild(list.firstChild) }
 
-  features.getArray().sort(
-    (a,b) => a.get('nom').localeCompare(b.get('nom'))
-  )
+  features.getArray().sort((a,b) => a.get('nom').localeCompare(b.get('nom')))
+
   for (let i = 0 ; i < 10 && i < features.getLength() ; i++) {
     let node = document.createElement('li')
     node.innerText = features.item(i).get('nom')
