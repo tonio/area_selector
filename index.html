@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <title>Filter</title>
+  <style>
+    body {
+      font-family : Helvetica;
+      display     : flex;
+    }
+    .map {
+      height : 700px;
+      width  : 700px;
+    }
+    .form {
+      flex    : 1;
+      padding : 1em;
+    }
+    .map,
+    .form {
+      border        : 2px solid #ddd;
+      border-radius : 4px;
+      margin        : 1em;
+    }
+    .selection {
+      border        : 1px solid rgba(128, 128, 0, 1);
+      background    : rgba(255, 255, 204, .35);
+      text-align    : center;
+      color         : rgba(128, 128, 0, 1);
+      padding       : .5em;
+      font-size     : .8em;
+      margin-top    : 0;
+      border-radius : 4px;
+    }
+    .search {
+      border        : 1px solid #cfd6e6;
+      border-radius : 4px;
+      padding       : .3em;
+    }
+    .autocomplete-suggestion span {
+      display    : inline-block;
+      width      : .8em;
+      text-align : center;
+    }
+  </style>
+  <link rel="stylesheet" href="ol.css">
+  <link rel="stylesheet" href="auto-complete.css">
+
+</head>
+<body>
+
+  <div class="map"></div>
+
+  <div class="form">
+
+    <p class="selection">
+      <span class="count">0</span> commune(s) sélectionnée(s).
+    </p>
+
+    <button class="all">
+      Sélectionner toute la région
+    </button>
+    <button class="none">
+      Tout désélectionner
+    </button>
+
+    <br><br>
+
+    <select class="dpt">
+      <option value="" selected>Choisir un département</option>
+      <option value="02">Aisne</option>
+      <option value="59">Nord</option>
+      <option value="60">Oise</option>
+      <option value="62">Pas-de-Calais</option>
+      <option value="80">Somme</option>
+    </select>
+
+    <br><br>
+
+    <label>
+      Rechercher une commune
+      <input class="search">
+    </label>
+
+    <br><br>
+
+    <button class="bbox">
+      Sélectionner par BBOX
+    </button>
+
+    <br><br>
+
+    <ul class="list"></ul>
+
+  </div>
+
+  <script src="ol-debug.js"></script>
+  <script src="auto-complete.min.js"></script>
+  <script src="filter.es6"></script>
+</body>
+</html>
