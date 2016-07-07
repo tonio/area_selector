@@ -147,6 +147,9 @@ select.getFeatures().on('change:length', debounce(() => {
   let list = document.querySelector('.list')
   while (list.firstChild) { list.removeChild(list.firstChild) }
 
+  features.getArray().sort(
+    (a,b) => a.get('nom').localeCompare(b.get('nom'))
+  )
   for (let i = 0 ; i < 10 && i < features.getLength() ; i++) {
     let node = document.createElement('li')
     node.innerText = features.item(i).get('nom')
