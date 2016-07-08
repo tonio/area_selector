@@ -31,6 +31,28 @@ const map = new ol.Map({
 
 const format = new ol.format.GeoJSON()
 
+const updateSelection = (features, cumulative=false) => {
+  const collection = select.getFeatures()
+  if (!cumulative) {
+    collection.clear()
+  }
+  const uniques = [ ...new Set(collection.getArray().concat(features)) ]
+  collection.clear()
+  collection.extend(uniques)
+
+  // update UI
+  document.querySelector('.count').innerText = collection.getLength()
+  let list = document.querySelector('.list')
+  while (list.firstChild) { list.removeChild(list.firstChild) }
+
+  collection.getArray().sort((a,b) => a.get('nom').localeCompare(b.get('nom')))
+  for (let i = 0 ; i < 10 && i < collection.getLength() ; i++) {
+    let node = document.createElement('li')
+    node.innerText = collection.item(i).get('nom')
+    list.appendChild(node)
+  }
+}
+
 fetch('hdf.json').then(
   response => response.json()
 ).then(json => {
@@ -48,6 +70,7 @@ const select = new ol.interaction.Select({
   toggleCondition : ol.events.condition.always
 })
 map.getInteractions().push(select)
+select.on('select', () => updateSelection([], true))
 
 const dragBox = new ol.interaction.DragBox({
   style     : buildStyle([ 255, 255, 204, .35], [ 128, 128, 0, 1 ]),
@@ -62,7 +85,7 @@ dragBox.on('boxend', function() {
     extent,
     (feature) => { selected.push(feature) }
   )
-  select.getFeatures().extend(selected)
+  updateSelection(selected, true)
   dragBox.setActive(false)
   select.setActive(true)
 })
@@ -71,17 +94,15 @@ document.querySelector('.dpt').addEventListener('change', e => {
   let selected = vector.getSource().getFeatures().filter(
     f => f.get('insee').substr(0, 2) == e.target.value
   )
-  select.getFeatures().clear()
-  select.getFeatures().extend(selected)
+  updateSelection(selected)
 })
 
 document.querySelector('.all').addEventListener('click', e => {
-  select.getFeatures().clear()
-  select.getFeatures().extend(vector.getSource().getFeatures())
+  updateSelection(vector.getSource().getFeatures())
 })
 
 document.querySelector('.none').addEventListener('click', e => {
-  select.getFeatures().clear()
+  updateSelection([])
 })
 
 document.querySelector('.bbox').addEventListener('click', e => {
@@ -119,41 +140,11 @@ new autoComplete({
     let f = vector.getSource().getFeatureById(item.getAttribute('data-id'))
     if (select.getFeatures().getArray().indexOf(f) >= 0) {
       select.getFeatures().remove(f)
+      updateSelection([], true)
     } else {
-      select.getFeatures().push(f)
+      updateSelection([f], true)
     }
     f.setStyle(buildStyle([255, 0, 0, .5], [255, 0, 0, .2]))
     setTimeout(() => f.setStyle(), 350)
   }
 })
-
-const debounce = (func, wait, immediate) => {
-  let timeout
-  return function() {
-    var context = this, args = arguments
-    var later = () => {
-      timeout = null
-      if (!immediate) func.apply(context, args)
-    }
-    var callNow = immediate && !timeout
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-    if (callNow) func.apply(context, args)
-  }
-}
-
-select.getFeatures().on('change:length', debounce(() => {
-  const features = select.getFeatures()
-  document.querySelector('.count').innerText = features.getLength()
-  let list = document.querySelector('.list')
-  while (list.firstChild) { list.removeChild(list.firstChild) }
-
-  features.getArray().sort((a,b) => a.get('nom').localeCompare(b.get('nom')))
-
-  for (let i = 0 ; i < 10 && i < features.getLength() ; i++) {
-    let node = document.createElement('li')
-    node.innerText = features.item(i).get('nom')
-    list.appendChild(node)
-  }
-}, 100))
-
