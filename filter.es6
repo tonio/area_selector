@@ -31,6 +31,12 @@ const map = new ol.Map({
 
 const format = new ol.format.GeoJSON()
 
+const highlightStyle = buildStyle([255, 0, 0, .5], [255, 0, 0, .2])
+const highlight = (feature) => {
+  feature.setStyle(highlightStyle)
+  setTimeout(() => feature.setStyle(), 250)
+}
+
 const updateSelection = (features, cumulative=false) => {
   const collection = select.getFeatures()
   if (!cumulative) {
@@ -39,6 +45,7 @@ const updateSelection = (features, cumulative=false) => {
   const uniques = [ ...new Set(collection.getArray().concat(features)) ]
   collection.clear()
   collection.extend(uniques)
+  features.map(highlight)
 
   // update UI
   document.querySelector('.count').innerText = collection.getLength()
@@ -70,10 +77,12 @@ const select = new ol.interaction.Select({
   toggleCondition : ol.events.condition.always
 })
 map.getInteractions().push(select)
-select.on('select', () => updateSelection([], true))
+select.on('select', (e) => {
+  updateSelection([], true)
+  e.selected.map(highlight)
+})
 
 const dragBox = new ol.interaction.DragBox({
-  style     : buildStyle([ 255, 255, 204, .35], [ 128, 128, 0, 1 ]),
   condition : ol.events.condition.always
 })
 map.getInteractions().push(dragBox)
